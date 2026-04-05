@@ -156,10 +156,10 @@ jobs:
             sed -i '$s|echo "\$res"|echo "-${{ env.ANDROID_VERSION }}-oki-xiaoxiaow"|' kernel_platform/msm-kernel/scripts/setlocalversion
             sed -i '$s|echo "\$res"|echo "-${{ env.ANDROID_VERSION }}-oki-xiaoxiaow"|' kernel_platform/external/dtc/scripts/setlocalversion
           else
-            # 6.6 GKI 内核：保留 -4k 后缀，通过 setlocalversion 追加自定义标识
-            # 不要修改 gki_defconfig 中的 LOCALVERSION，否则 GKI 验证失败无法开机
-            echo '-oki-xiaoxiaow' >> kernel_platform/common/scripts/setlocalversion
-            echo '-oki-xiaoxiaow' >> kernel_platform/msm-kernel/scripts/setlocalversion
+            # 6.6 GKI 内核：保留 -4k 后缀，通过 localversion 文件追加自定义标识
+            # 不修改 gki_defconfig 中的 LOCALVERSION，否则 GKI 验证失败
+            echo '-oki-xiaoxiaow' > kernel_platform/common/localversion
+            echo '-oki-xiaoxiaow' > kernel_platform/msm-kernel/localversion
           fi
 
           echo "✅ 内核配置完成"
