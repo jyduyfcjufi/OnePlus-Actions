@@ -156,10 +156,10 @@ jobs:
             sed -i '$s|echo "\$res"|echo "-${{ env.ANDROID_VERSION }}-oki-xiaoxiaow"|' kernel_platform/msm-kernel/scripts/setlocalversion
             sed -i '$s|echo "\$res"|echo "-${{ env.ANDROID_VERSION }}-oki-xiaoxiaow"|' kernel_platform/external/dtc/scripts/setlocalversion
           else
-            ESCAPED_SUFFIX=$(printf '%s\n' "-${{ env.ANDROID_VERSION }}-oki-xiaoxiaow" | sed 's:[\/&]:\\&:g')
-            sudo sed -i "s/-4k/$ESCAPED_SUFFIX/g" kernel_platform/common/arch/arm64/configs/gki_defconfig
-            sed -i 's/${scm_version}//' kernel_platform/common/scripts/setlocalversion
-            sed -i 's/${scm_version}//' kernel_platform/msm-kernel/scripts/setlocalversion
+            # 6.6 GKI 内核：保留 -4k 后缀，通过 setlocalversion 追加自定义标识
+            # 不要修改 gki_defconfig 中的 LOCALVERSION，否则 GKI 验证失败无法开机
+            echo '-oki-xiaoxiaow' >> kernel_platform/common/scripts/setlocalversion
+            echo '-oki-xiaoxiaow' >> kernel_platform/msm-kernel/scripts/setlocalversion
           fi
 
           echo "✅ 内核配置完成"
@@ -267,6 +267,10 @@ jobs:
           # 添加对 Mountify (backslashxx/mountify) 模块的支持
           echo "CONFIG_TMPFS_XATTR=y" >> ./common/arch/arm64/configs/gki_defconfig
           echo "CONFIG_TMPFS_POSIX_ACL=y" >> ./common/arch/arm64/configs/gki_defconfig
+
+          # 绕过内核模块版本验证
+          sed -i 's/^CONFIG_MODVERSIONS=y/CONFIG_MODVERSIONS=n/' ./common/arch/arm64/configs/gki_defconfig
+          echo "CONFIG_MODULE_FORCE_LOAD=y" >> ./common/arch/arm64/configs/gki_defconfig
 
           # LXC 容器支持 - 修复缺失选项
           echo "📦 启用 LXC 容器支持..."
